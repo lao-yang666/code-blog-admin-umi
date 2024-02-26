@@ -1,0 +1,47 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    restart: always
+    ports:
+      - 5432:5432
+    networks: # 容器网络
+      - laoyang-net
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=docker123456
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  ly_server:
+    build: # 制作镜像
+      context: . # 当前目录，Dockerfile 所在的目录（单“.”表示当前目录）
+      dockerfile: ./ly_server/Dockerfile # dockerfile文件名称
+    container_name: nestjs
+    restart: always
+    ports:
+      - 3000:3000
+    networks: # 容器网络
+      - laoyang-net
+    depends_on: # 依赖项
+      - db # 容器名    
+
+  ly_admin:
+    container_name: umi-demo
+    build:
+      context: .
+      dockerfile: ./ly_admin/Dockerfile
+    ports:
+      - 5175:80
+    restart: always
+    depends_on: # 依赖项
+      - ly_server # 容器名    
+    networks: # 容器网络
+      - laoyang-net
+networks:
+    laoyang-net:

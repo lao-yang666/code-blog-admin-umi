@@ -1,0 +1,28 @@
+version: "3"
+services:
+  nginx: # 服务名称，用户自定义
+    image: nginx:latest  
+    ports:
+      - 9527:9527 
+    volumes:
+      - /home/pro/workpase/nginx/html:/usr/share/nginx/html
+      - /home/pro/workpase/nginx/nginx.conf:/etc/nginx/nginx.conf
+    privileged: true # 这个必须要，解决nginx的文件调用的权限问题
+  mysql:
+    image: mysql:5.7.27
+    ports:
+    - 3306:3306
+    environment: # 指定用户root的密码
+      - MYSQL_ROOT_PASSWORD=123456
+    volumes: # 持久化数据库数据
+      - /home/mysql/conf:/etc/mysql/conf.d
+      - /home/mysql/data:/var/lib/mysql
+  app:
+    image: app:latest #镜像来源 名字跟Dockerfilce保持
+    build: . # 表示以当前目录下的Dockerfile开始构建镜像
+    ports:
+      - 8080:8080
+    volumes:
+      - /home/docker:/data
+    depends_on:
+      - mysql
