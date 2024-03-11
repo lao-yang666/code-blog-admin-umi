@@ -11,6 +11,7 @@ import { Button, Divider, Drawer, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import CreateForm from './components/CreateForm';
 import UpdateForm, { FormValueType } from './components/UpdateForm';
+import { Link } from '@umijs/max';
 
 const { addPost, queryPostList, deletePost, modifyPost, deleteOnePost } =
   services.PostController;
@@ -101,6 +102,7 @@ const handleDel = async (id: string | undefined) => {
   }
 };
 
+
 const TableList: React.FC<unknown> = () => {
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   const [updateModalVisible, handleUpdateModalVisible] =
@@ -186,7 +188,7 @@ const TableList: React.FC<unknown> = () => {
   return (
     <PageContainer
       header={{
-        title: '用户管理',
+        title: '文章管理',
       }}
     >
       <ProTable<API.PostInfo>
@@ -201,9 +203,9 @@ const TableList: React.FC<unknown> = () => {
           <Button
             key="1"
             type="primary"
-            onClick={() => handleModalVisible(true)}
+            // onClick={() => handleModalVisible(true)}
           >
-            新建
+            <Link to="/Post/PostAdd">新建</Link>
           </Button>,
         ]}
         request={async (params, sorter, filter) => {

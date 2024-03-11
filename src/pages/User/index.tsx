@@ -213,7 +213,7 @@ const TableList: React.FC<unknown> = () => {
           >
             批量删除
           </Button>
-          <Button type="primary">批量审批</Button>
+          <Button type="primary">审批</Button>
         </FooterToolbar>
       )}
       <CreateForm
