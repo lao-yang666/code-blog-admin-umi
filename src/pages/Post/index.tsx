@@ -1,4 +1,4 @@
-import services from '@/services/demo';
+import services from '@/services/api';
 import {
   ActionType,
   FooterToolbar,

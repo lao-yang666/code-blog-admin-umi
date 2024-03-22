@@ -1,3 +1,4 @@
+
 import { defineConfig } from '@umijs/max';
 export default defineConfig({
   antd: {},
@@ -5,10 +6,27 @@ export default defineConfig({
   model: {},
   initialState: {},
   request: {},
+  plugins: ['@umijs/max-plugin-openapi'],
+  openAPI: [
+    {
+      requestLibPath: "import { request } from '@umijs/max'",
+      // requestLibPath: "import { request } from 'umi'",
+      // schemaPath: path.join(__dirname, 'openapi.json'),
+      schemaPath:
+        'http://localhost:3000/swagger-json',
+      // 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
+      mock: true,
+      projectName: 'api-test',
+    },
+  ],
+
+
+
   proxy: {
     '/api': {
       // 要代理的地址
-      target: 'http://101.43.20.171:3000',
+      // target: 'http://101.43.20.171:3000',
+      target: 'http://localhost:3000',
       // 配置了这个可以从 http 代理到 https
       // 依赖 origin 的功能可能需要这个，比如 cookie
       changeOrigin: true,
@@ -56,7 +74,7 @@ export default defineConfig({
           component: './Post/PostAdd',
           hideInMenu: true,
           exact: true,
-          menuRender: false,
+          // menuRender: false,
         },
       ]
     },

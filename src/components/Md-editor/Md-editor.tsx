@@ -14,23 +14,30 @@ import highlightTheme from '@ziuchen/bytemd-plugin-highlight-theme'
 import hls from '@ziuchen/bytemd-plugin-highlight-theme/dist/highlights.json'
 import savePlugin from './plugins/plugin-save'
 import backPlugin from './plugins/plugin-back'
-import './Md-editor.less';
+import gfm_zh from '@bytemd/plugin-gfm/locales/zh_Hans.json'
+import math_zh from '@bytemd/plugin-math/locales/zh_Hans.json'
+import mermaid_zh from '@bytemd/plugin-mermaid/locales/zh_Hans.json'
+import markdownTheme_zh from '@ziuchen/bytemd-plugin-markdown-theme/locales/zh_Hans.json'
+import highlightTheme_zh from '@ziuchen/bytemd-plugin-highlight-theme/locales/zh_Hans.json'
 import zhHans from 'bytemd/locales/zh_Hans.json'
+import './Md-editor.less';
 const MdEditor: React.FC<any> = ({ value, onChange, onSave, onBack }) => {
   const plugins = [
-    gfm(),
+    gfm({ locale:gfm_zh }),
     breaks(),
     gemoji(),
     highlight(),
-    math(),
+    math({ locale:math_zh }),
     medium(),
-    mermaid(),
+    mermaid({ locale:mermaid_zh }),
     frontmatter(),
     markdownTheme({
       themes: themes,
+      locale:markdownTheme_zh
     }),
     highlightTheme({
       highlights: hls,
+      locale:highlightTheme_zh
     }),
     savePlugin(onSave),
     backPlugin(onBack),

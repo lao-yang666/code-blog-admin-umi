@@ -1,6 +1,7 @@
 {
   "private": true,
-  "author": "冷阳 <843978773@qq.com>",
+  "author": "老羊",
+  "name": "",
   "scripts": {
     "build": "max build",
     "dev": "max dev",
@@ -8,7 +9,8 @@
     "postinstall": "max setup",
     "prepare": "husky install",
     "setup": "max setup",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "openapi": "max openapi"
   },
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
@@ -23,9 +25,11 @@
     "@bytemd/plugin-mermaid": "^1.21.0",
     "@bytemd/react": "^1.21.0",
     "@umijs/max": "^4.1.0",
+    "@umijs/max-plugin-openapi": "^2.0.3",
     "@ziuchen/bytemd-plugin-highlight-theme": "^1.0.6",
     "@ziuchen/bytemd-plugin-markdown-theme": "^1.0.2",
-    "antd": "^5.4.0"
+    "antd": "^5.4.0",
+    "swagger-ui-react": "^5.12.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.33",
