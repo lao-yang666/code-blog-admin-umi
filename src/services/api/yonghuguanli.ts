@@ -10,7 +10,7 @@ export async function userControllerUpdateUser(
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;
-  return request<any>(`/user/${param0}`, {
+  return request<any>(`/user/update/${param0}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -21,6 +21,26 @@ export async function userControllerUpdateUser(
   });
 }
 
+/** 批量修改用户角色 PUT /user/${param0} */
+export async function userControllerUpdateBatchUser(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  body: {
+    user_ids: number[],
+    role_id: number,
+  },
+  options?: { [key: string]: any },
+) {
+  return request<any>(`/user/updateBatch`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+
 /** 删除用户 DELETE /user/${param0} */
 export async function userControllerDeleteDraft(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -28,7 +48,7 @@ export async function userControllerDeleteDraft(
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;
-  return request<any>(`/user/${param0}`, {
+  return request<any>(`/user/del/${param0}`, {
     method: 'DELETE',
     params: { ...queryParams },
     ...(options || {}),
@@ -64,12 +84,35 @@ export async function userControllerGetUserList(
   });
 }
 
+
+/** 获取不分页的用户列表 GET /user/sellist */
+export async function userControllerGetSelUserList() {
+  return request<any>('/user/selist', {
+    method: 'GET',
+  });
+}
+
 /** 新增用户 POST /user/new */
 export async function userControllerCreateUser(
   body: API.UserNew,
   options?: { [key: string]: any },
 ) {
   return request<any>('/user/new', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 登录 PUT /user/${param0} */
+export async function userLoginByAccount(
+  body: Pick<API.UserNew, 'name' | 'password'>,
+  options?: { [key: string]: any },
+) {
+  return request<any>('/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

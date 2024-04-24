@@ -2,9 +2,18 @@
 
 // 全局初始化数据配置，用于 Layout 用户信息和权限初始化
 // 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
+import type { RequestConfig } from 'umi';
+import umiRequest from '@/utils/request';
 import 'bytemd/dist/index.css'
-export async function getInitialState(): Promise<{ name: string }> {
-  return { name: '大数据库管理平台' };
+import { getToken, getSessionStorageItem } from '@/utils';
+import type { InitialStateTypes } from '@/utils/types'
+
+export async function getInitialState(): Promise<InitialStateTypes> {
+  const userInfo = getSessionStorageItem<API.User>("userInfo") ?? undefined;
+  console.log(userInfo, '==');
+
+  const token = getToken() ?? undefined;
+  return { token, userInfo };
 }
 
 export const layout = () => {
@@ -15,3 +24,6 @@ export const layout = () => {
     },
   };
 };
+
+
+export const request: RequestConfig = umiRequest;

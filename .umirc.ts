@@ -1,5 +1,6 @@
 
 import { defineConfig } from '@umijs/max';
+import routes from './src/routes/routes';
 export default defineConfig({
   antd: {},
   access: {},
@@ -15,7 +16,7 @@ export default defineConfig({
       schemaPath:
         'http://localhost:3000/swagger-json',
       // 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
-      mock: true,
+      mock: false,
       projectName: 'api-test',
     },
   ],
@@ -36,48 +37,10 @@ export default defineConfig({
   layout: {
     title: '大数据管理平台2',
   },
-  routes: [
-    {
-      path: '/',
-      redirect: '/home',
-    },
-    {
-      name: '首页',
-      path: '/home',
-      component: './Home',
-    },
-    // {
-    //   name: '权限演示2',
-    //   path: '/access',
-    //   component: './Access',
-    // },
-    {
-      name: '用户管理',
-      path: '/User',
-      component: './User',
-    },
-    {
-      name: '文章管理',
-      path: '/Post',
-      exact: true,
-      routes: [
-        {
-          name: '文章列表',
-          path: '/Post',
-          component: './Post',
-          hideInMenu: true,
-          exact: true,
-        },
-        {
-          name: '新建文章',
-          path: '/Post/PostAdd',
-          component: './Post/PostAdd',
-          hideInMenu: true,
-          exact: true,
-          // menuRender: false,
-        },
-      ]
-    },
-  ],
+  routes,
+  alias: {
+    '@': './src',
+    '~': './public'
+  },
   npmClient: 'yarn',
 });

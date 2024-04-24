@@ -13,6 +13,7 @@
     "openapi": "max openapi"
   },
   "dependencies": {
+    "@ant-design/charts": "^2.0.3",
     "@ant-design/icons": "^5.0.1",
     "@ant-design/pro-components": "^2.4.4",
     "@bytemd/plugin-breaks": "^1.21.0",
@@ -28,7 +29,10 @@
     "@umijs/max-plugin-openapi": "^2.0.3",
     "@ziuchen/bytemd-plugin-highlight-theme": "^1.0.6",
     "@ziuchen/bytemd-plugin-markdown-theme": "^1.0.2",
+    "ahooks": "^3.7.11",
     "antd": "^5.4.0",
+    "bcrypt": "^5.1.1",
+    "lodash": "^4.17.21",
     "swagger-ui-react": "^5.12.0"
   },
   "devDependencies": {

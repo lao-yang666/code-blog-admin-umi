@@ -2,7 +2,7 @@
 import { DEFAULT_NAME } from '@/constants';
 import { useState } from 'react';
 
-const useUser = () => {
+const useGlobal = () => {
   const [name, setName] = useState<string>(DEFAULT_NAME);
   return {
     name,
@@ -10,4 +10,4 @@ const useUser = () => {
   };
 };
 
-export default useUser;
+export default useGlobal;

@@ -9,8 +9,8 @@ import {
 import { Button, Divider, Drawer, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import DiyForm from '@/components/DiyForm';
-
-const { userControllerGetUserById: getUserDetail, userControllerCreateUser: addUser, userControllerGetUserList: queryUserList, userControllerDeleteDraft: deleteUser, userControllerUpdateUser: modifyUser } =
+const { roleControllerGetSelRoleList: getRoleOption } = services.jiaoseguanli;
+const { userControllerCreateUser: addUser, userControllerGetUserList: queryUserList, userControllerDeleteDraft: deleteUser, userControllerUpdateUser: modifyUser } =
   services.yonghuguanli;
 
 /**
@@ -42,6 +42,9 @@ const handleUpdate = async (fields: any) => {
       { id: fields.id },
       {
         id: fields.id,
+        phone: fields.phone,
+        password: fields.password,
+        role_id: fields.role_id,
         name: fields.name || '',
         nickName: fields.nickName || '',
         email: fields.email || '',
@@ -78,8 +81,18 @@ const handleDel = async (id: string | undefined) => {
   }
 };
 
+const getRoleList = async () => {
+  const { data } = await getRoleOption();
+  return (data ?? []).map((item: API.Role) => ({
+    label: item.role_name,
+    value: item.id,
+  }))
+};
+
+
 const TableList: React.FC<unknown> = () => {
   const [modalVisible, handleModalVisible] = useState<boolean>(false);
+  const [params, setParams] = useState({});
   const [tableAction, handleTableAction] =
     useState<string>('add');
   const [currentRecord, setCurrentRecord] = useState<API.User>({} as any);
@@ -94,6 +107,7 @@ const TableList: React.FC<unknown> = () => {
       fieldProps: {
         readOnly: tableAction === 'edit'
       },
+      hideInSearch:true,
       formItemProps: {
         rules: [
           {
@@ -110,12 +124,35 @@ const TableList: React.FC<unknown> = () => {
       initialValue: currentRecord?.nickName,
     },
     {
+      title: '手机号码',
+      dataIndex: 'phone',
+      valueType: 'text',
+      hideInSearch:true,
+      initialValue: currentRecord?.phone,
+    },
+    {
+      title: '角色',
+      dataIndex: 'role_id',
+      request: getRoleList,
+      initialValue: currentRecord?.role_id,
+      render: (_, record) => record?.role_name
+    },
+    {
+      title: '密码',
+      dataIndex: 'password',
+      valueType: 'text',
+      hideInForm:true,
+      hideInSearch:true,
+      initialValue: currentRecord?.password,
+      render: () => '********',
+    },
+    {
       title: '性别',
       dataIndex: 'gender',
       initialValue: currentRecord?.gender,
       valueEnum: {
-        0: { text: '男', status: '男' },
-        1: { text: '女', status: '女' },
+        'man': { text: '男', status: '男' },
+        'woman': { text: '女', status: '女' },
       },
     },
     {
@@ -123,6 +160,7 @@ const TableList: React.FC<unknown> = () => {
       dataIndex: 'email',
       initialValue: currentRecord?.email,
       valueType: 'text',
+      hideInSearch:true,
       formItemProps: {
         rules: [
           {
@@ -131,40 +169,6 @@ const TableList: React.FC<unknown> = () => {
           },
         ],
       },
-    }
-  ];
-  const columns: ProColumns<API.UserNew>[] = [
-    {
-      title: '名称',
-      dataIndex: 'name',
-      tip: '名称是唯一的 key',
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: '名称为必填项',
-          },
-        ],
-      },
-    },
-    {
-      title: '昵称',
-      dataIndex: 'nickName',
-      valueType: 'text',
-    },
-    {
-      title: '性别',
-      dataIndex: 'gender',
-      valueEnum: {
-        0: { text: '男', status: '男' },
-        1: { text: '女', status: '女' },
-      },
-    },
-    {
-      title: '邮箱',
-      dataIndex: 'email',
-      valueType: 'text',
-      hideInSearch: true
     },
     {
       title: '操作',
@@ -192,7 +196,7 @@ const TableList: React.FC<unknown> = () => {
           <Divider type="vertical" />
           <a
             onClick={async () => {
-              await handleDel(record.id)
+              await handleDel(String(record.id))
               actionRef.current?.reloadAndRest?.();
             }}
           >
@@ -216,17 +220,27 @@ const TableList: React.FC<unknown> = () => {
       }
     }
   }
+
+  const handleFormChange = (changedValues: any, allValues: any) => {
+    setParams(allValues)
+    console.log(changedValues, allValues);
+  };
+
   return (
     <PageContainer
       header={{
         title: '用户管理',
       }}
     >
-      <ProTable<API.UserNew>
+      <ProTable<API.User>
         actionRef={actionRef}
         rowKey="id"
         pagination={{
           pageSize: 10,
+        }}
+        params={params}
+        form={{
+          onValuesChange: handleFormChange
         }}
         bordered
         search={{
@@ -255,7 +269,7 @@ const TableList: React.FC<unknown> = () => {
             // FIXME: remove @ts-ignore
             // @ts-ignore
             sorter,
-            filter,
+            ...filter,
           });
           return {
             data: data?.list || [],
@@ -263,10 +277,10 @@ const TableList: React.FC<unknown> = () => {
             total: data?.total || 0,
           };
         }}
-        columns={columns}
+        columns={formColumns}
       />
       <DiyForm title={tableAction === 'edit' ? '编辑用户' : '新增用户'} modalVisible={modalVisible} onCancel={() => handleModalVisible(false)}>
-        <ProTable<API.UserNew, API.UserNew>
+        <ProTable<API.User>
           onSubmit={handleSubmit}
           rowKey="id"
           type="form"
@@ -282,7 +296,7 @@ const TableList: React.FC<unknown> = () => {
         closable={false}
       >
         {row?.name && (
-          <ProDescriptions<API.UserNew>
+          <ProDescriptions<API.User>
             column={2}
             title={row?.name}
             request={async () => ({
@@ -291,7 +305,7 @@ const TableList: React.FC<unknown> = () => {
             params={{
               id: row?.name,
             }}
-            columns={columns}
+            columns={formColumns}
           />
         )}
       </Drawer>

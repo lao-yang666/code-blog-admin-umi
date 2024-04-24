@@ -1,19 +1,18 @@
 import { Modal } from 'antd';
 import React, { PropsWithChildren } from 'react';
 
-interface DiyFormProps {
-  title?: string
+interface CreateFormProps {
   modalVisible: boolean;
   onCancel: () => void;
 }
 
-const DiyForm: React.FC<PropsWithChildren<DiyFormProps>> = (props) => {
-  const { title = '新增', modalVisible, onCancel, } = props;
+const CreateForm: React.FC<PropsWithChildren<CreateFormProps>> = (props) => {
+  const { modalVisible, onCancel } = props;
 
   return (
     <Modal
       destroyOnClose
-      title={title}
+      title="新建"
       width={420}
       open={modalVisible}
       onCancel={() => onCancel()}
@@ -24,4 +23,4 @@ const DiyForm: React.FC<PropsWithChildren<DiyFormProps>> = (props) => {
   );
 };
 
-export default DiyForm;
+export default CreateForm;
