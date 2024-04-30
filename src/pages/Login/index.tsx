@@ -1,11 +1,8 @@
 import services from '@/services/api';
 import {
-  AlipayOutlined,
   LockOutlined,
   MobileOutlined,
-  TaobaoOutlined,
   UserOutlined,
-  WeiboOutlined,
 } from '@ant-design/icons';
 import {
   LoginFormPage,
@@ -14,14 +11,13 @@ import {
   ProFormCheckbox,
   ProFormText,
 } from '@ant-design/pro-components';
-import { history } from '@umijs/max';
-import { Button, Divider, Space, Tabs, message, theme } from 'antd';
+import { Tabs, theme } from 'antd';
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
 import backURl from '../../../public/img/sanyueqi.jpg';
 import { saveToken, setSessionStorageItem } from '@/utils';
-import { useModel } from 'umi';
 const { userLoginByAccount } = services.yonghuguanli;
+
 type LoginType = 'phone' | 'account';
 const iconStyles: CSSProperties = {
   color: 'rgba(0, 0, 0, 0.2)',
@@ -33,7 +29,6 @@ const iconStyles: CSSProperties = {
 const Page = () => {
   const [loginType, setLoginType] = useState<LoginType>('account');
   const [message, setMessage] = useState<string>('')
-  const { setUser } = useModel('userModel')
   const { token } = theme.useToken();
   const onSubmit = async (values: any) => {
     console.log(values);
@@ -42,10 +37,15 @@ const Page = () => {
       if (res.data.code === -1) {
         setMessage(res.data.msg)
       } else if (res.data.access_token) {
-        saveToken(res.data.access_token)
+        saveToken(res.data.access_token);
         setSessionStorageItem('userInfo', res.data)
-        setUser(res.data)
-        history.push('/');
+        window.location.href = '/';
+        //  const { data } = await queryMenuList();
+        // await setInitialState((s) => ({ ...s, ...{ token: res.data.access_token, userInfo: res.data, MenuData: data } })).then(() => {
+        //   // history.push('/');  // 需要先登录才能获取菜单列表,所以此时动态路由未加载 
+        //   window.location.href = '/';  // window.location.href跳转会使render与patchClientRoutes重新渲染
+        // })
+
       }
     } catch (error) {
       setMessage('登录出错!请稍后再试！')

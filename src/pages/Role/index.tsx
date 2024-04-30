@@ -10,11 +10,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useModel } from '@umijs/max';
 import DiyForm from '@/components/DiyForm';
 import StaffAuthorizationModal from '@/components/Modals/StaffAuthorizationModal';
+import MenuAuthorizationModal from '@/components/Modals/MenuAuthorizationModal';
 const { roleGetUserAccessByid, modifyRoleStatus, roleControllerCreateRole: addRole, roleControllerGetRoles: queryRoleList, roleControllerDeleteRole: deleteRole, roleControllerUpdateRole: modifyRole } =
   services.jiaoseguanli;
 
 const { userControllerGetSelUserList: queryUserList } = services.yonghuguanli;
-
+const { menuControllerGetSelMenuList: queryMenuList, menuControllerGetSelPermissionList: roleGetMenuAccessByid } = services.caidanguanli;
 /**
  * 添加
  * @param fields
@@ -98,12 +99,15 @@ const handleDel = async (id: number) => {
 const TableList: React.FC<unknown> = () => {
   const [modalVisible, handleModalVisible] = useState<boolean>(false);
   const [userAceessModalVisible, handleUserAceessModalVisible] = useState<boolean>(false);
+  const [menuAceessModalVisible, handleMenuAceessModalVisible] = useState<boolean>(false);
   const [params, setParams] = useState({});
   const [tableAction, handleTableAction] =
     useState<string>('add');
   const [currentRecord, setCurrentRecord] = useState<API.Role>({} as any);
   const [userList, setUserList] = useState<API.User[]>([]);
-  const [checkUser, setCheckUser] = useState<API.UserControllerGetUserByIdParams[]>([]);
+  const [menuList, setMenuList] = useState<API.Menu[]>([]);
+  const [checkUser, setCheckUser] = useState<number[]>([]);
+  const [checkMenu, setCheckMenu] = useState<number[]>([]);
   const actionRef = useRef<ActionType>();
   const { initialState } = useModel('@@initialState');
   const queryRoleUserAccess = (id: number) => {
@@ -112,6 +116,16 @@ const TableList: React.FC<unknown> = () => {
         const userData = res.data.User;
         const userIds = userData.map((item: API.User) => item.id)
         setCheckUser(userIds)
+      }
+    })
+  }
+
+  const queryRoleMenuAccess = (id: number) => {
+    roleGetMenuAccessByid({ id }).then((res) => {
+      if (res.code === 200) {
+        const menuData = res.data;
+        const menuIds = menuData.map((item: API.Menu) => item.menu_id)
+        setCheckMenu(menuIds)
       }
     })
   }
@@ -202,11 +216,22 @@ const TableList: React.FC<unknown> = () => {
           <Divider type="vertical" />
           <a
             onClick={() => {
-              handleModalVisible(true);
+              queryRoleMenuAccess(record.id)
               setCurrentRecord(record);
+              handleMenuAceessModalVisible(true)
             }}
           >
             分配菜单
+          </a>
+          <Divider type="vertical" />
+          <a
+            onClick={() => {
+              handleModalVisible(true);
+              setCurrentRecord(record);
+              handleTableAction('edit')
+            }}
+          >
+            分配权限
           </a>
           <Divider type="vertical" />
           <a
@@ -236,7 +261,7 @@ const TableList: React.FC<unknown> = () => {
     if (tableAction === 'edit') {
       callApi = handleUpdate
       Object.assign(value, { id: currentRecord.id })
-    }else{
+    } else {
       Object.assign(value, { founder: initialState?.userInfo?.id ? String(initialState?.userInfo?.id) : '' })
     }
     const success = await callApi(value);
@@ -257,8 +282,11 @@ const TableList: React.FC<unknown> = () => {
     queryUserList().then((res) => {
       if (res.code === 200) {
         setUserList(res.data)
-        console.log(userList, '==');
-
+      }
+    })
+    queryMenuList().then((res) => {
+      if (res.code === 200) {
+        setMenuList(res.data)
       }
     })
   }, [])
@@ -329,9 +357,18 @@ const TableList: React.FC<unknown> = () => {
         checkData={checkUser}
         userData={userList}
         modalVisible={userAceessModalVisible}
-        onChange={(val: API.UserControllerGetUserByIdParams[]) => { setCheckUser(val) }}
+        onChange={(val: number[]) => { setCheckUser(val) }}
         onCancel={() => handleUserAceessModalVisible(false)}>
       </StaffAuthorizationModal>
+      <MenuAuthorizationModal
+        title='分配角色菜单'
+        role_id={currentRecord.id}
+        checkData={checkMenu}
+        menuData={menuList}
+        modalVisible={menuAceessModalVisible}
+        onChange={(val: number[]) => { setCheckMenu(val) }}
+        onCancel={() => handleMenuAceessModalVisible(false)}>
+      </MenuAuthorizationModal>
     </PageContainer >
   );
 };

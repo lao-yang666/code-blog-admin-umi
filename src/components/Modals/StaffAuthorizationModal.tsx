@@ -1,17 +1,11 @@
-import React, { PropsWithChildren, ReactNode } from 'react';
-import { Button, Checkbox, Col, Modal, Row } from 'antd';
+import React, { PropsWithChildren, ReactNode, useEffect } from 'react';
+import { Button, Checkbox, Col, Modal, Row, message } from 'antd';
 import services from '@/services/api';
 import type { GetProp } from 'antd';
 import styled from 'styled-components'
 const { userControllerUpdateBatchUser: updateMany } = services.yonghuguanli;
 const ButtonBox = styled.div`
   display:flex;
-  justify-content:center;
-  align-items:center;
-`
-
-const Title = styled.span`
-  font-size: 16px;
   justify-content:center;
   align-items:center;
 `
@@ -37,11 +31,11 @@ const StaffAuthorizationModal: React.FC<PropsWithChildren<StaffAuthorizationModa
       role_id,
     }).then((res) => {
       if (res.code === 200) {
+        message.success(res.msg);
         onCancel();
       }
     })
   }
-  console.log(userData,'userData===')
   return (
     <Modal
       destroyOnClose

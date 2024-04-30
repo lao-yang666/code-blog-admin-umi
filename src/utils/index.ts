@@ -4,77 +4,20 @@
  * @Author: laoyang
  * @LastEditors: laoyang
  */
-import type { ColumnsState, RequestData } from '@ant-design/pro-components';
+import type { ColumnsState } from '@ant-design/pro-components';
 import { history } from '@umijs/max';
-import { compact, eq, get, join, sample, startsWith } from 'lodash';
+import { eq, sample } from 'lodash';
 import { stringify } from 'querystring';
 
 // import { getPermissions, getRoutesMenus, getUserInfo } from '@/services/logic/login' // 登录相关接口
-import { LOCAL_STORAGE, REQUEST_CODE, ROUTES } from '@/utils/enums'
-import type { InitialStateTypes, LockSleepTypes, PageResponse, Response } from '@/utils/types'
-
-/**
- * @description: 获取用户信息、菜单和权限
- * @author: laoyang
- */
-// export const initUserAuthority = async (): Promise<InitialStateTypes> => {
-//   try {
-//     // 获取用户信息和菜单按钮权限
-//     const [userInfo, routeMenuInfo, permissionInfo] =
-//       await Promise.all([getUserInfo(), getRoutesMenus(), getPermissions()])
-//     // 初始化全局状态
-//     return {
-//       CurrentUser: get(userInfo, 'data', {}),
-//       RouteMenu: get(routeMenuInfo, 'data', []),
-//       Permissions: get(permissionInfo, 'data', []),
-//     }
-//   } catch (error) {
-//     history.push(ROUTES.LOGIN);
-//     return {}
-//   }
-// }
-
+import { LOCAL_STORAGE, ROUTES } from '@/utils/enums'
+import type { LockSleepTypes } from '@/utils/types'
+import { REQUEST_CODE } from './enums';
 /**
  * @description: 判断请求是否成功
  * @author: laoyang
  */
 export const isSuccess = (code?: number): boolean => eq(code, REQUEST_CODE.SUCCESS)
-
-/**
- * @description: 格式化请求数据
- * @author: laoyang
- */
-export const formatResponse = <T extends any[]>(
-  response: Response<T> |
-    Response<PageResponse<T[number]>>): RequestData<T[number]> => {
-  // 解构响应值
-  const { code, data } = response
-  return {
-    data: get(data, 'list') || get(response, 'data') || [],
-    // success 请返回 true，不然 table 会停止解析数据，即使有数据
-    success: isSuccess(code),
-    total: get(data, 'total', 0),
-  }
-}
-
-/**
- * @description: 将 pathname 转成国际化对应的 key，如：/administrative/jobs-management => administrative.jobs-management
- * @author: laoyang
- */
-export const formatPathName = (pathname: string): string => {
-  return join(compact(pathname.split('/')), '.')
-}
-
-/**
- * @description: 统一国际化前缀
- * @param {boolean} isMenu
- * @Author: laoyang
- */
-export const formatPerfix = (route: string, suffix = '', isMenu = false): string => {
-  // 国际化字符串
-  const field = `${isMenu ? 'menu' : 'pages'}.${formatPathName(route)}${suffix ? '.' + suffix : ''}`
-  return startsWith(route, 'global') ? route : field
-}
 
 export const isLogin = (): boolean => {
   const isLogin = sessionStorage.getItem(LOCAL_STORAGE.ACCESS_TOKEN);

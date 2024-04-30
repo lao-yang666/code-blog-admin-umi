@@ -1,6 +1,7 @@
 
 import { defineConfig } from '@umijs/max';
 import routes from './src/routes/routes';
+import { staticRoutes } from './src/routes/routes'
 export default defineConfig({
   antd: {},
   access: {},
@@ -37,7 +38,8 @@ export default defineConfig({
   layout: {
     title: '大数据管理平台2',
   },
-  routes,
+  routes: staticRoutes,
+  // routes,
   alias: {
     '@': './src',
     '~': './public'

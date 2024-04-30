@@ -22,7 +22,7 @@ const apiKey = 'Sdcp14pKMKm0XNAMY' // 心知天气 密钥
 const RenderContent: FC = () => {
   // 获取全局状态
   const { initialState } = useModel('@@initialState');
-
+debugger;
   /**
    * @description: 查询天气实况
    */

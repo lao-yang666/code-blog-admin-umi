@@ -1,5 +1,4 @@
 declare namespace API {
-  type Buffer = {};
 
   type gameShanhaiMonster = {
     id: number;
@@ -134,6 +133,65 @@ declare namespace API {
     updated_time: string;
   };
 
+  type Permission = {
+    role_id?: string;
+    menu_id?: string;
+    created_time: string;
+    updated_time: string;
+    Role?: Role;
+    Menu?: Menu;
+  };
+
+  type PermissionControllerGetRoleUserAccessByidParams = {
+    id: number;
+  };
+
+  type PermissionNew = {
+    role_id: number;
+    menu_id: string[];
+  };
+
+  type Permissions = {
+    id: number;
+    name: string;
+    permission_key: string;
+    role_id?: number;
+    menu_id?: number;
+    button_id?: number;
+    scope: permissionScope;
+    describe?: string;
+    created_time: string;
+    updated_time: string;
+  };
+
+  type PermissionsControllerDeletePermissionsParams = {
+    id: number;
+  };
+
+  type PermissionsControllerGetPermissionsByidParams = {
+    id: string;
+  };
+
+  type PermissionsControllerGetPermissionssParams = {
+    current: string;
+    pageSize: string;
+    name: string;
+    permissions_name?: any;
+  };
+
+  type permissionScope = 'role' | 'menu' | 'button';
+
+  type PermissionsNew = {
+    name: string;
+    permission_key: string;
+    role_id?: number;
+    menu_id?: number;
+    button_id?: number;
+    scope: permissionScope;
+    describe?: string;
+    created_time: string;
+    updated_time: string;
+  };
 
   type User = {
     id: number;
@@ -212,4 +270,89 @@ declare namespace API {
     current: number;
     pageSize: number;
   }
+
+  type Menu = {
+    menu_id: number;
+    name: string;
+    path: string;
+    icon?: string;
+    component?: string;
+    redirect?: string;
+    parent_id?: number;
+    permission?: string;
+    meta?: string;
+    extraProperties?: string;
+    wrappers?: number;
+    hideChildrenInMenu?: number;
+    hideInMenu?: number;
+    hideInBreadcrumb?: number;
+    founder: number;
+    sort: number;
+    status: number;
+    created_time: string;
+    updated_time: string;
+    children?: Menu[];
+  };
+
+  type MenuNew = {
+    name: string;
+    path: string;
+    icon?: string;
+    component?: string;
+    redirect?: string;
+    parent_id?: number;
+    permission?: string;
+    meta?: string;
+    extraProperties?: string;
+    wrappers?: number;
+    hideChildrenInMenu?: number;
+    hideInMenu?: number;
+    hideInBreadcrumb?: number;
+    founder: number;
+    sort: number;
+    status: number;
+    created_time: string;
+    updated_time: string;
+    children?: Menu[];
+  };
+  type buttonPermission = {
+    id: number;
+    name: string;
+    permission_key: string;
+    menu_id: number;
+    effect_form?: string;
+    describe?: string;
+    created_time: string;
+    updated_time: string;
+    menu: API.Menu;
+  };
+
+  type ButtonPermissionControllerDeletebuttonPermissionParams = {
+    id: number;
+  };
+
+  type ButtonPermissionControllerGetbuttonPermissionByidParams = {
+    id: string;
+  };
+
+  type ButtonPermissionControllerGetbuttonPermissionsParams = {
+    current: string;
+    pageSize: string;
+    name: string;
+    button_permission_name?: any;
+  };
+
+  type ButtonPermissionControllerGetbuttonPermissionUserAccessByidParams = {
+    id: string;
+  };
+
+  type buttonPermissionNew = {
+    name: string;
+    permission_key: string;
+    menu_id: number;
+    effect_form?: string;
+    describe?: string;
+    created_time: string;
+    updated_time: string;
+  };
 }

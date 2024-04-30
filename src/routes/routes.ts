@@ -26,13 +26,12 @@ export default [
     name: '文章管理',
     path: '/Post',
     exact: true,
+    redirct: '/Post/PostList',
     routes: [
       {
         name: '文章列表',
-        path: '/Post',
+        path: '/Post/PostList',
         component: './Post',
-        hideInMenu: true,
-        exact: true,
       },
       {
         name: '新建文章',
@@ -90,6 +89,28 @@ export default [
           '@/wrappers/auth',
         ],
       },
+      {
+        name: '权限管理',
+        path: '/System/Permission',
+        component: './Permission',
+        wrappers: [
+          '@/wrappers/auth',
+        ],
+      },
     ],
   },
+]
+
+
+export const staticRoutes = [
+  {
+    path: '/',
+    redirect: '/home',
+  },
+  {
+    name: '登录页',
+    path: '/login',
+    component: './Login',
+    layout: false,
+  }
 ]

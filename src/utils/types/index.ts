@@ -108,6 +108,7 @@ export type InitialStateTypes = {
   token?: string;
   Settings?: Partial<LayoutSettings>;
   userInfo?: API.User;
+  MenuData?: API.Menu[];
   Permissions?: string[];
   Collapsed?: boolean;
 }

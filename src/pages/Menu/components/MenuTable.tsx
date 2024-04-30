@@ -1,38 +1,71 @@
 import React, { useState } from 'react';
-import { Space, Switch, Table } from 'antd';
+import { Button, Space, Switch, Table } from 'antd';
 import type { TableColumnsType, TableProps } from 'antd';
+import { PageContainer } from '@ant-design/pro-components';
 
 type TableRowSelection<T> = TableProps<T>['rowSelection'];
 
-interface DataType {
-  key: React.ReactNode;
-  name: string;
-  age: number;
-  address: string;
-  children?: DataType[];
-}
-
-const columns: TableColumnsType<DataType> = [
+const columns: TableColumnsType<API.Menu> = [
   {
-    title: 'Name',
+    title: '菜单名称',
     dataIndex: 'name',
     key: 'name',
+    width: 40,
   },
   {
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
-    width: '12%',
+    title: '路由地址',
+    dataIndex: 'path',
+    key: 'path',
+    width: 200,
   },
   {
-    title: 'Address',
-    dataIndex: 'address',
-    width: '30%',
-    key: 'address',
+    title: '组件地址',
+    dataIndex: 'component',
+    key: 'component',
+    width: 200,
+  },
+  {
+    title: '重定向地址',
+    dataIndex: 'redirect',
+    key: 'redirect',
+    width: 200,
+  },
+  {
+    title: '图标',
+    dataIndex: 'icon',
+    key: 'icon',
+    width: 200,
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    key: 'status',
+    width: 200,
+  },
+  {
+    title: '额外配置',
+    dataIndex: 'extraProperties',
+    key: 'extraProperties',
+    width: 200,
+  },
+  {
+    title: '操作',
+    dataIndex: 'action',
+    key: 'action',
+    width: 320,
+    render(value, record, index) {
+      return (
+        <>
+          <Button>编辑</Button>
+          <Button>新增子菜单</Button>
+          <Button>删除</Button>
+        </>
+      )
+    },
   },
 ];
 
-const data: DataType[] = [
+const data: API.Menu[] = [
   {
     key: 1,
     name: 'John Brown sr.',
@@ -98,7 +131,7 @@ const data: DataType[] = [
 ];
 
 // rowSelection objects indicates the need for row selection
-const rowSelection: TableRowSelection<DataType> = {
+const rowSelection: TableRowSelection<API.Menu> = {
   onChange: (selectedRowKeys, selectedRows) => {
     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
   },
@@ -111,16 +144,18 @@ const rowSelection: TableRowSelection<DataType> = {
 };
 
 const App: React.FC = () => {
-  const [checkStrictly, setCheckStrictly] = useState(false);
+  const [checkStrictly] = useState(false);
 
   return (
-    <>
+    <PageContainer>
+      <Button>新增一级菜单</Button>
       <Table
+        bordered
         columns={columns}
         rowSelection={{ ...rowSelection, checkStrictly }}
         dataSource={data}
       />
-    </>
+    </PageContainer>
   );
 };
 
