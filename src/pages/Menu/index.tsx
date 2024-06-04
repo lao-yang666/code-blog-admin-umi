@@ -10,15 +10,34 @@ import { Button, Divider, Drawer, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import DiyForm from '@/components/DiyForm';
 import { useModel } from '@umijs/max';
+import AccessButton from '@/components/AccessButton';
 const { roleControllerGetSelRoleList: getRoleOption } = services.jiaoseguanli;
 const { menuControllerCreateMenu: addMenu, menuControllerGetSelMenuList: queryMenuList, menuControllerDeleteMenu: deleteMenu, menuControllerUpdateMenu: modifyMenu } =
   services.caidanguanli;
 
+const permissionEnum: Record<string, any> = {
+  '0': { text: '只读', status: '只读', key: 'read' },
+  '1': { text: '读写', status: '读写', key: 'write' },
+  '2': { text: '新增', status: '新增', key: 'new' },
+  '3': { text: '删除', status: '删除', key: 'delete' },
+  '4': { text: '详情', status: '详情', key: 'detail' },
+  '5': { text: '编辑', status: '编辑', key: 'edit' },
+  '6': { text: '上传', status: '上传', key: 'upload' },
+  '7': { text: '下载', status: '下载', key: 'download' },
+}
 /**
  * 添加
  * @param fields
  */
 const handleAdd = async (fields: API.MenuNew) => {
+  if (typeof fields.permissionList !== 'string') {
+    const permissionList = fields.permissionList?.map((item: string) => {
+      return permissionEnum[item]
+    })
+    fields.permissionList = JSON.stringify(permissionList)
+  } else {
+    fields.permissionList = undefined
+  }
   const hide = message.loading('正在添加');
   try {
     await addMenu({ ...fields });
@@ -172,13 +191,23 @@ const TableList: React.FC<unknown> = () => {
       },
     },
     {
-      title: '是否隐藏',
+      title: '是否隐藏子菜单以及自身',
       dataIndex: 'hideInMenu',
       hideInSearch: true,
-      initialValue: !!currentRecord.menu_id ? String(currentRecord.hideInMenu) : '1',
+      initialValue: !!currentRecord.menu_id && typeof currentRecord.hideChildrenInMenu === 'number' ? String(currentRecord.hideInMenu) : '1',
       valueEnum: {
-        '1': { text: '显示', status: '显示' },
-        '0': { text: '隐藏', status: '隐藏' },
+        '0': { text: '是', status: '是' },
+        '1': { text: '否', status: '否' },
+      },
+    },
+    {
+      title: '是否隐藏子菜单',
+      dataIndex: 'hideChildrenInMenu',
+      hideInSearch: true,
+      initialValue: !!currentRecord.menu_id && typeof currentRecord.hideChildrenInMenu === 'number' ? String(currentRecord.hideChildrenInMenu) : '1',
+      valueEnum: {
+        '0': { text: '是', status: '是' },
+        '1': { text: '否', status: '否' },
       },
     },
     {
@@ -186,7 +215,15 @@ const TableList: React.FC<unknown> = () => {
       dataIndex: 'sort',
       hideInSearch: true,
       hideInTable: true,
-      initialValue: currentRecord.sort
+      initialValue: currentRecord.sort,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: '排序为必填项',
+          },
+        ],
+      },
     },
     {
       title: '元数据',
@@ -204,53 +241,56 @@ const TableList: React.FC<unknown> = () => {
       hideInSearch: true,
     },
     {
+      title: '权限配置',
+      dataIndex: 'permissionList',
+      initialValue: ['0', '1'],
+      valueType: 'checkbox',
+      hideInForm: tableAction === 'edit',
+      hideInSearch: true,
+      hideInTable: true,
+      valueEnum: permissionEnum,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: '至少配置一个初始权限',
+          },
+        ],
+      },
+    },
+    {
       title: '操作',
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => (
         <>
-          <a
-            onClick={async () => {
-              handleModalVisible(true);
-              setParentId(record.menu_id);
-              setCurrentRecord({} as any);
-              handleTableAction('add')
-            }}
-          >
+          <AccessButton hidedivider={true} permission_key='system-menu-newchild' type='link' onClick={async () => {
+            handleModalVisible(true);
+            setParentId(record.menu_id);
+            setCurrentRecord({} as any);
+            handleTableAction('add')
+          }}>
             新增子菜单
-          </a>
-          <Divider type="vertical" />
-          <a
-            onClick={() => {
-              handleModalVisible(true);
-              setCurrentRecord(record);
-              handleTableAction('edit')
-              if (record.parent_id) {
-                setParentId(record.parent_id)
-              } else {
-                setParentId(undefined)
-              }
-            }}
+          </AccessButton>
+          <AccessButton permission_key='system-menu-edit' type='link' onClick={() => {
+            handleModalVisible(true);
+            setCurrentRecord(record);
+            handleTableAction('edit')
+            if (record.parent_id) {
+              setParentId(record.parent_id)
+            } else {
+              setParentId(undefined)
+            }
+          }}
           >
             编辑
-          </a>
-          <Divider type="vertical" />
-          <a
-            onClick={() => {
-              setRow(record)
-            }}
-          >
-            查看
-          </a>
-          <Divider type="vertical" />
-          <a
-            onClick={async () => {
-              await handleDel(String(record.menu_id))
-              actionRef.current?.reloadAndRest?.();
-            }}
-          >
+          </AccessButton>
+          <AccessButton permission_key='system-menu-delete' type='link' onClick={async () => {
+            await handleDel(String(record.menu_id))
+            actionRef.current?.reloadAndRest?.();
+          }}>
             删除
-          </a>
+          </AccessButton>
         </>
       ),
     },
@@ -261,7 +301,7 @@ const TableList: React.FC<unknown> = () => {
       callApi = handleUpdate
       Object.assign(value, { menu_id: currentRecord.menu_id })
     } else {
-      Object.assign(value, { founder: initialState?.userInfo?.id }, { hideInMenu: Number(value.hideInMenu) })
+      Object.assign(value, { founder: initialState?.userInfo?.id })
     }
     const success = await callApi(value);
     if (success) {
@@ -306,13 +346,13 @@ const TableList: React.FC<unknown> = () => {
           },
         }}
         toolBarRender={() => [
-          <Button
-            key="1"
+          <AccessButton
+            permission_key='system-menu-new'
+            key='1'
             type="primary"
-            onClick={() => { handleModalVisible(true); handleTableAction('add'); setCurrentRecord({} as any); setParentId(undefined) }}
-          >
+            onClick={() => { handleModalVisible(true); handleTableAction('add'); setCurrentRecord({} as any); setParentId(undefined) }}>
             新增菜单
-          </Button>,
+          </AccessButton>,
         ]}
         request={async (params, sorter, filter) => {
           const { data, success } = await queryMenuList();
@@ -329,6 +369,7 @@ const TableList: React.FC<unknown> = () => {
           onSubmit={handleSubmit}
           rowKey="id"
           type="form"
+          form={{ layout: 'horizontal' }}
           columns={formColumns}
         />
       </DiyForm>

@@ -30,6 +30,20 @@ export async function roleGetUserAccessByid(
   });
 }
 
+/** 角色分配权限详情 GET /role/${param0} */
+export async function roleGetPermissionsAccessByid(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.RoleControllerGetRoleByidParams,
+  options?: { [key: string]: any },
+) {
+  const { id: param0, ...queryParams } = params;
+  return request<any>(`/role/permissionsAccess/${param0}`, {
+    method: 'GET',
+    params: { ...queryParams },
+    ...(options || {}),
+  });
+}
+
 /** 删除角色信息 DELETE /role/${param0} */
 export async function roleControllerDeleteRole(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)

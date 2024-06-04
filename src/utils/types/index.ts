@@ -109,7 +109,9 @@ export type InitialStateTypes = {
   Settings?: Partial<LayoutSettings>;
   userInfo?: API.User;
   MenuData?: API.Menu[];
-  Permissions?: string[];
+  menuViewIds?: number[];
+  Permissions?: API.RoleMenuPermission[];
+  CurrentRoleId?: number;
   Collapsed?: boolean;
 }
 

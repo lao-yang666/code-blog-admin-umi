@@ -5,9 +5,10 @@ import {
   ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Divider, Popconfirm, message } from 'antd';
+import { Popconfirm, message } from 'antd';
 import React, { useRef, useState } from 'react';
-import { Link, history } from '@umijs/max';
+import { history, useModel } from '@umijs/max';
+import AccessButton from '@/components/AccessButton';
 
 const { postControllerGetPublishedPosts: queryPostList, postControllerDeleteManyPost: deleteManyPost,
   postControllerDeletePost: deletePost, postControllerCreateDraft: addDraft } =
@@ -39,7 +40,7 @@ const handleRemove = async (selectedRows: API.PostControllerDeleteDraftParams[])
  *  单个删除
  * @param selectedRows
  */
-const handleDel = async (id: string | undefined) => {
+const handleDel = async (id: number) => {
   if (!id) return;
   const hide = message.loading('正在删除');
   try {
@@ -54,15 +55,15 @@ const handleDel = async (id: string | undefined) => {
   }
 };
 
-const handleEdit = async (record: API.PostNew & API.PostControllerUpdatePostParams) => {
-  const { title, content, authorId, authorName, draftId, published } = record
+const handleEdit = async (record: API.Post, authorId: number) => {
+  const { title, content, draftId, published } = record
   if (!published) {
     history.push(`/Post/PostAdd?id=${record.id}`)
   } else if (draftId) {
     history.push(`/Post/PostAdd?id=${record.draftId}`)
   } else {
     try {
-      const { data } = await addDraft({ title, content, authorId, authorName, postId: record.id ? Number(record.id) : undefined });
+      const { data } = await addDraft({ title, content, authorId, postId: record.id ? Number(record.id) : undefined });
       history.push(`/Post/PostAdd?id=${data?.draftId}`)
       return true;
     } catch (error) {
@@ -75,7 +76,7 @@ const handleEdit = async (record: API.PostNew & API.PostControllerUpdatePostPara
 const getAuthorList = async () => {
   const { data } = await queryUserList();
   return (data ?? []).map((item: API.User) => ({
-    label: item.name,
+    label: item.nickName,
     value: item.id,
   }))
 };
@@ -83,6 +84,8 @@ const getAuthorList = async () => {
 const TableList: React.FC<unknown> = () => {
   const actionRef = useRef<ActionType>();
   const [params, setParams] = useState({});
+  const { initialState } = useModel('@@initialState');
+
   const columns: ProColumns<API.Post>[] = [
     {
       title: '标题',
@@ -151,9 +154,10 @@ const TableList: React.FC<unknown> = () => {
       title: '作者',
       dataIndex: 'authorId',
       valueType: 'text',
+      hideInSearch: initialState?.userInfo?.role?.sort as number > 3,
       request: getAuthorList,
       renderText(text, record) {
-        return record?.authorName;
+        return record?.author?.nickName;
       },
     },
     {
@@ -162,25 +166,22 @@ const TableList: React.FC<unknown> = () => {
       valueType: 'option',
       render: (_, record) => (
         <>
-          {/* <Link to={`/Post/PostAdd?id=${record.id}`}>编辑</Link> */}
-          <a
-            onClick={() => {
-              handleEdit(record);
-            }}
-          >
+          <AccessButton hidedivider={true} permission_key='post-postlist-edit' type='link' onClick={() => {
+            handleEdit(record, initialState?.userInfo?.id as number);
+          }}>
             编辑
-          </a>
-          <Divider type="vertical" />
-          <Link to={`/Post/PostDetail?id=${record.id}`}>阅读</Link>
-          <Divider type="vertical" />
-          <a
-            onClick={async () => {
-              await handleDel(record.id);
-              actionRef.current?.reloadAndRest?.();
-            }}
-          >
+          </AccessButton>
+          <AccessButton permission_key='post-postlist-detail' type='link' onClick={() => {
+            history.push(`/Post/PostDetail?id=${record.id}`)
+          }}>
+            阅读
+          </AccessButton>
+          <AccessButton permission_key='post-postlist-delete' type='link' onClick={async () => {
+            await handleDel(record.id);
+            actionRef.current?.reloadAndRest?.();
+          }}>
             删除
-          </a>
+          </AccessButton>
         </>
       ),
     },
@@ -217,13 +218,14 @@ const TableList: React.FC<unknown> = () => {
           },
         }}
         toolBarRender={() => [
-          <Button
-            key="1"
+          <AccessButton
+            permission_key='post-postlist-new'
+            key='1'
             type="primary"
-          // onClick={() => handleModalVisible(true)}
+            onClick={() => { history.push(`/Post/PostAdd`); }}
           >
-            <Link to="/Post/PostAdd">新建</Link>
-          </Button>,
+            创建文章
+          </AccessButton>,
         ]}
         params={params}
         request={async (params, sorter, filter) => {
@@ -245,7 +247,12 @@ const TableList: React.FC<unknown> = () => {
           description="一旦删除记录不可恢复,确定删除?"
           onConfirm={async () => { await handleRemove(selectedRowKeys); actionRef.current?.reloadAndRest?.(); }}
         >
-          <Button danger>批量删除</Button>
+          <AccessButton
+            permission_key='post-postlist-batchdelete'
+            danger
+          >
+            批量删除
+          </AccessButton>
         </Popconfirm>}
         rowSelection={{}}
         columns={columns}

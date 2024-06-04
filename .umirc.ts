@@ -1,19 +1,50 @@
 
 import { defineConfig } from '@umijs/max';
-import routes from './src/routes/routes';
-import { staticRoutes } from './src/routes/routes'
+import { staticRoutes } from './src/config/routes';
+import proxy from './src/config/proxy';
+const { REACT_APP_ENV = 'dev' } = process.env;
+const path = require('path');
 export default defineConfig({
+  /**
+ * @name 开启 多tab标签页支持
+ * @doc https://juejin.cn/post/7153525746751766559
+ */
+
+  keepalive: [/./],
+  tabsLayout: {
+    // 是否使用自定义的 tabs 组件，需要搭配运行时配置 getCustomTabs 使用
+    hasCustomTabs: true,
+    // 是否开启右侧的 tabs 管理器，可以实现“关闭左侧”，“关闭右侧”，“关闭其他”和“刷新”等功能。
+    hasDropdown: true,
+    hasFixedHeader: false,
+  },
+
+  plugins: [
+    '@umijs/max-plugin-openapi',
+    require.resolve('@alita/plugins/dist/keepalive'),
+    require.resolve('@alita/plugins/dist/tabs-layout'),
+    require.resolve('@umijs/plugins/dist/unocss')],
+
   antd: {},
   access: {},
   model: {},
   initialState: {},
   request: {},
-  plugins: ['@umijs/max-plugin-openapi'],
+
+  unocss: {
+    // 检测 className 的文件范围，若项目不包含 src 目录，可使用 `pages/**/*.tsx`
+    watch: ['src/**/*.tsx']
+  },
+
+  define: {
+    'process.env': {
+      ICONFONT_URL: '//at.alicdn.com/t/c/font_3629707_x0dxkt3btrg.js',
+    },
+  },
+
   openAPI: [
     {
       requestLibPath: "import { request } from '@umijs/max'",
-      // requestLibPath: "import { request } from 'umi'",
-      // schemaPath: path.join(__dirname, 'openapi.json'),
       schemaPath:
         'http://localhost:3000/swagger-json',
       // 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
@@ -22,27 +53,19 @@ export default defineConfig({
     },
   ],
 
-
-
-  proxy: {
-    '/api': {
-      // 要代理的地址
-      // target: 'http://101.43.20.171:3000',
-      target: 'http://localhost:3000',
-      // 配置了这个可以从 http 代理到 https
-      // 依赖 origin 的功能可能需要这个，比如 cookie
-      changeOrigin: true,
-      pathRewrite: { '^/api': '/' },
-    },
-  },
+  proxy: proxy[REACT_APP_ENV as keyof typeof proxy],
   layout: {
-    title: '大数据管理平台2',
+    title: 'umi max demo',
+    logo: './public/img/logo.png'
   },
+
   routes: staticRoutes,
-  // routes,
+  //routes,
+
   alias: {
     '@': './src',
-    '~': './public'
+    '~': './public',
+    react: path.join(__dirname, "../node_modules/react"),
   },
   npmClient: 'yarn',
 });

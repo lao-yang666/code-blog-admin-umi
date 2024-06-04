@@ -90,7 +90,7 @@ export async function menuControllerUpdateMenu(
 /** 菜单启用/停用 PUT /menu/updateStatus/${param0} */
 export async function menuControllerUpdateMenuStatus(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.MenuControllerGetMenusParams,
+  params: { id: number },
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;
@@ -115,21 +115,16 @@ export async function menuControllerGetMenuUserAccessByid(
   });
 }
 
-/** 提交角色菜单权限  */
-export async function menuControllerUpdateBatchPermission(
+/** 菜单分配权限 GET /menu/userAccess/${param0} */
+export async function menuControllerGetMenuAccessByid(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  body: {
-    menu_id: number[],
-    role_id: number,
-  },
+  params: { id: number },
   options?: { [key: string]: any },
 ) {
-  return request<any>(`/permission/update`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
+  const { id: param0, ...queryParams } = params;
+  return request<any>(`/menu/menuAccess/${param0}`, {
+    method: 'GET',
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
@@ -137,13 +132,32 @@ export async function menuControllerUpdateBatchPermission(
 /** 获取角色菜单权限  */
 export async function menuControllerGetSelPermissionList(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: { id: number },
+  params: { roleId: number, menuId?: number },
   options?: { [key: string]: any },
 ) {
-  const { id: param0, ...queryParams } = params;
-  return request<any>(`/permission/menuAccess/${param0}`, {
+  return request<any>(`/permission/menuPermission`, {
     method: 'GET',
-    params: { ...queryParams },
+    params,
+    ...(options || {}),
+  });
+}
+
+/** 提交角色菜单权限  */
+export async function menuControllerUppdateRoleMenuPermission(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  body: {
+    permissionId: number[],
+    menuId: number,
+    roleId: number,
+  },
+  options?: { [key: string]: any },
+) {
+  return request<any>(`/permission/updateMenuPermission`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }

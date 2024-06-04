@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useSearchParams } from '@umijs/max';
 
 const PostAdd: React.FC<unknown> = () => {
-  const [mdValue, handleChangeValue] = useState<string>('');
+  const [mdValue, handleChangeValue] = useState<string>('222222222222');
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
   if (id) {

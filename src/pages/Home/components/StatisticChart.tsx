@@ -19,38 +19,34 @@ const { Statistic } = StatisticCard;
 const StatisticChart: FC = () => {
   return (
     <Row gutter={20}>
+      {/* <TinyAreaChart /> */}
       <Col span={6}>
         <StatisticCard
-          title="总销售额"
-          tip="指标说明"
-          style={{ height: 200 }}
+          title="今日新增文章数"
+          style={{ height: 160 }}
           statistic={{
-            value: 1254568,
-            prefix: '¥',
-            precision: 2,
+            value: 12,
+            suffix: '篇',
             description: <Space>
               <Statistic title="日同比" value="6.47%" trend="up" />
               <Statistic title="周同比" value="23.58%" trend="down" />
             </Space>,
           }}
         >
-          <Divider type="horizontal" />
-          <Statistic value="88.98%" title="前年同期业绩完成率" />
         </StatisticCard>
       </Col>
       <Col span={6}>
-        <StatisticCard
+        {/* <StatisticCard
           title="访问量"
-          tip="指标说明"
           style={{ height: 200 }}
           statistic={{ value: 8846 }}
           chart={<TinyAreaChart />}
         >
           <Statistic value="56.12%" title="日访问量占比" />
-        </StatisticCard>
+        </StatisticCard> */}
       </Col>
       <Col span={6}>
-        <StatisticCard
+        {/* <StatisticCard
           title="支付笔数"
           tip="指标说明"
           style={{ height: 200 }}
@@ -58,10 +54,10 @@ const StatisticChart: FC = () => {
           chart={<TinyColumnChart />}
         >
           <Statistic value="78.82%" title="转化率" />
-        </StatisticCard>
+        </StatisticCard> */}
       </Col>
       <Col span={6}>
-        <StatisticCard
+        {/* <StatisticCard
           title="客户满意度"
           tip="指标说明"
           style={{ height: 200 }}
@@ -72,7 +68,7 @@ const StatisticChart: FC = () => {
             <Statistic title="日同比" value="12.25%" trend="up" />
             <Statistic title="周同比" value="56.35%" trend="down" />
           </Space>
-        </StatisticCard>
+        </StatisticCard> */}
       </Col>
     </Row>
   )

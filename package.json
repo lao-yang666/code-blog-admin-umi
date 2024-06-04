@@ -13,11 +13,12 @@
     "openapi": "max openapi"
   },
   "dependencies": {
-    "@ant-design/charts": "^2.0.3",
+    "@alita/plugins": "3.4.0",
+    "@ant-design/charts": "^2.1.1",
     "@ant-design/icons": "^5.0.1",
     "@ant-design/pro-components": "^2.4.4",
     "@bytemd/plugin-breaks": "^1.21.0",
-    "@bytemd/plugin-frontmatter": "^1.21.0",
+    " ": "^1.21.0",
     "@bytemd/plugin-gemoji": "^1.21.0",
     "@bytemd/plugin-gfm": "^1.21.0",
     "@bytemd/plugin-highlight": "^1.21.0",
@@ -25,15 +26,17 @@
     "@bytemd/plugin-medium-zoom": "^1.21.0",
     "@bytemd/plugin-mermaid": "^1.21.0",
     "@bytemd/react": "^1.21.0",
-    "@umijs/max": "^4.1.0",
+    "@umijs/max": "4.2.5",
     "@umijs/max-plugin-openapi": "^2.0.3",
+    "@unocss/cli": "^0.60.2",
     "@ziuchen/bytemd-plugin-highlight-theme": "^1.0.6",
     "@ziuchen/bytemd-plugin-markdown-theme": "^1.0.2",
-    "ahooks": "^3.7.11",
+    "ahooks": "^3.8.0",
     "antd": "^5.4.0",
     "bcrypt": "^5.1.1",
     "lodash": "^4.17.21",
-    "swagger-ui-react": "^5.12.0"
+    "swagger-ui-react": "^5.12.0",
+    "unocss": "^0.60.2"
   },
   "devDependencies": {
     "@types/react": "^18.0.33",

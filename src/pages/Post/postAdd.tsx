@@ -6,7 +6,7 @@ import { Button, Input, message } from 'antd';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { throttle, debounce } from '@/utils/common';
 import styled from 'styled-components'
-import { useSearchParams, useLocation, useParams } from '@umijs/max';
+import { useSearchParams, useModel, history } from '@umijs/max';
 const Div = styled.div`
   display:flex;
   justify-content:space-between;
@@ -35,6 +35,7 @@ const PostAdd: React.FC<unknown> = () => {
   const [title, handleChangeTitle] = useState<string>('');
   const mdInfoRef = useRef<{ title: string, content: string, lastContent: string }>({ title, content: mdValue, lastContent: mdValue });
   const [searchParams, setSearchParams] = useSearchParams();
+  const { initialState } = useModel('@@initialState');
 
   const btnText = useMemo(() => {
     return postDetailId ? '更新' : '发布';
@@ -46,7 +47,7 @@ const PostAdd: React.FC<unknown> = () => {
   }
 
   const handleBack = () => {
-    console.log(mdValue, '返回');
+    console.log('====================', '返回');
     history.go(-1);
   }
 
@@ -65,8 +66,9 @@ const PostAdd: React.FC<unknown> = () => {
       await modifyDraft({ id: postId }, { title, content: mdValue, id: Number(postId), published: true, postId: postDetailId ? Number(postDetailId) : undefined });
       hide();
       message.success(`${btnText}成功`);
-      history.go(-1);
-      return true
+      setTimeout(() => {
+        handleBack();
+      }, 500)
     } catch (error) {
       hide();
       message.error(`${btnText}失败请重试！`);
@@ -86,7 +88,7 @@ const PostAdd: React.FC<unknown> = () => {
         await modifyDraft({ id: postId }, { title: mdInfoRef.current.title, content: mdInfoRef.current.content, id: Number(postId) });
         return true;
       } else {
-        const { data } = await addDraft({ title, content: mdInfoRef.current.content, authorId: 1, authorName: '32', postId: postId ? Number(postId) : undefined });
+        const { data } = await addDraft({ title, content: mdInfoRef.current.content, authorId: initialState?.userInfo?.id, postId: postId ? Number(postId) : undefined });
         setSearchParams({ id: data?.id });
         return true;
       }

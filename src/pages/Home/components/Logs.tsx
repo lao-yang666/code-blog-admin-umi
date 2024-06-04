@@ -1,5 +1,5 @@
 import services from '@/services/api';
-import { Card, Table, Tag } from "antd"
+import { Table, Tag } from "antd"
 import type { TablePaginationConfig, TableProps } from 'antd';
 import { randomTagColor } from '@/utils';
 import { useEffect, useState } from 'react';
@@ -81,9 +81,8 @@ const Logs: React.FC = () => {
   useEffect(() => {
     getLogsData()
   }, [pagination.current, pagination.pageSize])
-  return <Card>
-    <Table<API.Logs> dataSource={logData} columns={columns} pagination={pagination} onChange={handleTableChange} />
-  </Card>
+  return (<Table<API.Logs>  size='middle' dataSource={logData} columns={columns} pagination={pagination} onChange={handleTableChange} />)
+
 }
 
 export default Logs

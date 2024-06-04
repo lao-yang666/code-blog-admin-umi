@@ -14,16 +14,17 @@ type CheckboxValueType = GetProp<typeof Checkbox.Group, 'value'>;
 
 interface StaffAuthorizationModalsProps {
   role_id: number;
+  level: number;
   title: string | ReactNode;
   userData: API.User[];
   checkData: CheckboxValueType[];
   modalVisible: boolean;
   onChange: (val: CheckboxValueType[]) => void;
-  onCancel: () => void;
+  onCancel: (reresh?: boolean) => void;
 }
 
 const StaffAuthorizationModal: React.FC<PropsWithChildren<StaffAuthorizationModalsProps>> = (props) => {
-  const { title, role_id, userData, modalVisible, checkData, onChange, onCancel } = props;
+  const { title, level, role_id, userData, modalVisible, checkData, onChange, onCancel } = props;
   const onConfrim = () => {
     // 确定按钮
     updateMany({
@@ -32,7 +33,7 @@ const StaffAuthorizationModal: React.FC<PropsWithChildren<StaffAuthorizationModa
     }).then((res) => {
       if (res.code === 200) {
         message.success(res.msg);
-        onCancel();
+        onCancel(true);
       }
     })
   }
@@ -43,10 +44,10 @@ const StaffAuthorizationModal: React.FC<PropsWithChildren<StaffAuthorizationModa
       width={520}
       open={modalVisible}
       onCancel={() => onCancel()}
-      footer={<ButtonBox>
+      footer={<div>
         <Button type="primary" onClick={() => onConfrim()} style={{ marginRight: '10px' }}>确定</Button>
         <Button onClick={() => onCancel()}>取消</Button>
-      </ButtonBox>}
+      </div>}
     >
       <Checkbox.Group style={{ width: '100%', display: 'unset' }} onChange={(checkedValues) => onChange(checkedValues)} value={checkData}>
         <Row style={{ width: '100%', marginBottom: '10px' }}>
@@ -64,6 +65,8 @@ const StaffAuthorizationModal: React.FC<PropsWithChildren<StaffAuthorizationModa
             </Col>
             <Col span={8}>
               <span>{item.role_name}</span>
+              {checkData.includes(item.id) ? item.role_level && item.role_level > level ? <span style={{ color: 'green' }}>&#x2191;&#x2191;
+              </span> : <span style={{ color: 'red' }}>&#x2193;&#x2193;</span> : null}
             </Col>
             <Col span={1} offset={3}>
               <Checkbox value={item.id}></Checkbox>

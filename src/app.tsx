@@ -2,22 +2,27 @@
 
 // 全局初始化数据配置，用于 Layout 用户信息和权限初始化
 // 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
-import type { RequestConfig } from 'umi';
-import { Navigate } from 'umi';
 import umiRequest from '@/utils/request';
 import 'bytemd/dist/index.css'
-import { getToken, getSessionStorageItem } from '@/utils';
-import { parseRoutes, formatRoute } from '@/utils/route';
+import '../public/css/index.css'
+import './pages/index.css'
+import { getToken, getSessionStorageItem, setSessionStorageItem } from '@/utils';
 import type { InitialStateTypes } from '@/utils/types'
-import { menuControllerGetSelMenuList as queryMenuList } from '@/services/api/caidanguanli'
-import { RunTimeLayoutConfig, history, InitDataType } from '@umijs/max';
+import { menuControllerGetSelMenuList as queryMenuList, menuControllerGetSelPermissionList as roleGetMenuAccessByid } from '@/services/api/caidanguanli'
+import { permissionControllerGetRoleUserAccessByid as getMenuView, } from '@/services/api/quanxianguanli'
+import { history } from '@umijs/max';
 import { eq, assign } from 'lodash';
-import React from 'react';
-import ErrorBoundary from '@/components/ErrorBoundary'
-import { Result } from 'antd';
-import { staticRoutes } from './routes/routes'
+import TabsLayout, { TabsLayoutProps } from './components/TabsLayout';
+import type { DynamicRoutes } from '@/utils/types/dynamicroutes/typings';
+import { BasiLayout } from '@/components/BasicLayout'; // 全局 layout 布局
+import loopMenuItem from './components/DiyRouteItem';
+import { LOCAL_STORAGE } from './utils/enums';
+import defaultSettings from './config/defaultSettings';
+
 export async function getInitialState(): Promise<InitialStateTypes> {
+  const Layout_Settings = getSessionStorageItem<TabsLayoutProps>(LOCAL_STORAGE.LAYOUT) ?? defaultSettings;
   const userInfo = getSessionStorageItem<API.User>("userInfo") ?? undefined;
+  setSessionStorageItem(LOCAL_STORAGE.LAYOUT, Layout_Settings)
   const token = getToken() ?? undefined;
   // 初始化数据
   const initialState: InitialStateTypes = {
@@ -31,108 +36,42 @@ export async function getInitialState(): Promise<InitialStateTypes> {
 
   // 如果不是登录页面，执行
   if (!eq(location.pathname, '/login')) {
-    const { data } = await queryMenuList();
+    const [menu, roleMenu, menuView] = await Promise.all([queryMenuList(), roleGetMenuAccessByid({ roleId: Number(userInfo?.role_id) }), getMenuView({ id: Number(userInfo?.role_id) })])
     // 初始化全局状态
     return assign(initialState, {
-      MenuData: data,
+      CurrentRoleId: Number(userInfo?.role_id),
+      MenuData: menu.data,
+      Permissions: roleMenu.data,
+      menuViewIds: menuView.data.map((item: API.Permission) => item.menu_id),
     })
   }
   return initialState;
 }
 
-export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }: InitDataType) => {
-  console.log(initialState, 'init');
+export const layout = BasiLayout;
+
+
+//注意这里 传入了 initialState
+export async function tabsLayout({ initialState }) {
   return {
-    logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
-    // menu: {
-    //   locale: false,
-    //   params: initialState?.userInfo?.id,
-    //   request: async () => {
-    //     return initialState?.MenuData
-    //   },
-    // },
-    // 菜单的折叠收起事件
-    onCollapse: (collapsed) => {
-      setInitialState(s => ({ ...s, Collapsed: collapsed }));
-    },
-    // ErrorBoundary: () => (
-    //   <Result status="error" title="出错了" subTitle="糟糕，页面出了错误，请刷新页面。" />
-    // ),
-
+    local: {},
+    icons: {},
   };
-};
-
-
-export const request: RequestConfig = umiRequest;
-
-
-interface RouteItem {
-  path?: string;
-  name?: string;
-  icon?: string;
-  id?: number | string;
-  parentId?: number | string;
-  element?: JSX.Element;
-  children?: RouteItem[];
-  routes: RouteItem[];
 }
+
+export const getCustomTabs = () => (props: TabsLayoutProps) => <TabsLayout {...props} />
+
+
+export const request = umiRequest;
 
 
 let extraRoutes: API.Menu[] = [];
-const loopMenuItem = (menus: API.Menu[], pId: number | string | undefined): RouteItem[] => {
-  return menus.flatMap((item): any => {
-    let Component: React.ComponentType<any> | null = null;
-    if (item.component) {
-      // 防止配置了路由，但本地暂未添加对应的页面，产生的错误
-      Component = React.lazy(() => new Promise((resolve, reject) => {
-        import(`@/pages${item.component}`)
-          .then(module => resolve(module))
-          .catch((error) => resolve(import(`@/pages/404.tsx`)))
-      }))
-    }
-    if (item.children) {
-      return [
-        {
-          parentId: pId,
-          ...formatRoute(item),
-          children: [
-            {
-              path: item.path,
-              element: <Navigate to={item?.redirect ?? item.children[0].path} replace />,
-            },
-            ...loopMenuItem(item.children, item.menu_id)
-          ]
-        }
-      ]
-    } else {
-      return [
-        {
-          ...formatRoute(item),
-          parentId: pId,
-          element: (
-            <ErrorBoundary>
-              <React.Suspense fallback={<div>Loading...</div>}>
-                {/* {React.createElement(React.lazy(() => import(`@/pages${item.component}`)))} */}
-                {Component && <Component />}
-              </React.Suspense>
-            </ErrorBoundary>
 
-          )
-        }
-      ]
-    }
-  })
-}
+export function patchClientRoutes({ routes }: { routes: DynamicRoutes.RouteItem[] }) {
 
-export function patchClientRoutes({ routes }: { routes: RouteItem[] }) {
-
-  const routerIndex = routes.findIndex((item: RouteItem) => item.path === '/')
+  const routerIndex = routes.findIndex((item: DynamicRoutes.RouteItem) => item.path === '/')
   const parentId = routes[routerIndex].id
-  console.log(routes, 'routes');
   if (extraRoutes.length) {
-    // routes[routerIndex]['routes'].unshift({
-    //   ...staticRoutes
-    // })
     routes[routerIndex]['routes'].push(
       ...loopMenuItem(extraRoutes, parentId)
     )
@@ -140,10 +79,8 @@ export function patchClientRoutes({ routes }: { routes: RouteItem[] }) {
   }
 }
 
-
 export function render(oldRender: any) {
   console.log('===render==');
-
   queryMenuList().then((res) => {
     if (res) {
       extraRoutes = res.data;

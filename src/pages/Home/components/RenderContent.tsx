@@ -7,14 +7,14 @@
  * @LastEditTime: 2023-10-20 09:09:49
  */
 import { useModel } from '@umijs/max'
-import { useRequest } from 'ahooks'
 import { Avatar, Card, Col, Row, Space, Statistic, Typography } from 'antd';
 import { get } from 'lodash-es'
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import avatorImg from '@/assets/img/avator.png'
 import { isSuccess, timeFix, welcomeWords } from '@/utils'
+import { MessageOutlined, PhoneOutlined } from '@ant-design/icons';
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 // https://www.seniverse.com/
 const apiKey = 'Sdcp14pKMKm0XNAMY' // 心知天气 密钥
@@ -22,19 +22,21 @@ const apiKey = 'Sdcp14pKMKm0XNAMY' // 心知天气 密钥
 const RenderContent: FC = () => {
   // 获取全局状态
   const { initialState } = useModel('@@initialState');
-debugger;
-  /**
-   * @description: 查询天气实况
-   */
-  const { data: weatherInfo } = useRequest(
-    async () => {
-      const response = await fetch(`https://api.seniverse.com/v3/weather/now.json?key=${apiKey}&location=ip`)
-      if (isSuccess(response.status)) {
-        const result = get(await response.json(), 'results.[0]')
-        return result
-      }
-      return {}
+  const [weatherInfo, setWeatherInfo] = useState({});
+  const getWeather = async () => {
+    const response = await fetch(`https://api.seniverse.com/v3/weather/now.json?key=${apiKey}&location=ip`)
+    if (isSuccess(response.status)) {
+      const result = get(await response.json(), 'results.[0]')
+      return result
+    }
+    return {}
+  }
+  useEffect(() => {
+    getWeather().then(res => {
+      console.log(res, '====')
+      setWeatherInfo(res)
     })
+  }, [])
   return (
     <Card>
       <Row justify="space-between" align="middle">
@@ -45,6 +47,12 @@ debugger;
             </Col>
             <Col>
               <Title level={4}>{`${timeFix()}，${initialState?.userInfo?.nickName}，${welcomeWords()}`}</Title>
+              <Paragraph>
+                <PhoneOutlined className='pr-2' title='电话'/>
+                <Text className='pr-6'>{initialState?.userInfo?.phone}</Text>
+                <MessageOutlined className='pr-2' title='邮箱'/>
+                <Text>{initialState?.userInfo?.email}</Text>
+              </Paragraph>
               {weatherInfo && <Text type="secondary">
                 {get(weatherInfo, 'location.name', '')}，
                 今日天气{get(weatherInfo, 'now.text', '')}，{get(weatherInfo, 'now.temperature', 0)}℃！</Text>}

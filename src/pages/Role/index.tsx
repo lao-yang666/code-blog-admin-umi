@@ -5,17 +5,28 @@ import {
   ProColumns,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Divider, Switch, message } from 'antd';
+import { Button, Divider, Switch, Tag, message } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
 import { useModel } from '@umijs/max';
 import DiyForm from '@/components/DiyForm';
 import StaffAuthorizationModal from '@/components/Modals/StaffAuthorizationModal';
 import MenuAuthorizationModal from '@/components/Modals/MenuAuthorizationModal';
-const { roleGetUserAccessByid, modifyRoleStatus, roleControllerCreateRole: addRole, roleControllerGetRoles: queryRoleList, roleControllerDeleteRole: deleteRole, roleControllerUpdateRole: modifyRole } =
+import { Link, history } from '@umijs/max';
+import { randomTagColor } from '@/utils';
+import AccessButton from '@/components/AccessButton';
+const { roleGetUserAccessByid,
+  modifyRoleStatus,
+  roleControllerCreateRole: addRole,
+  roleControllerGetRoles: queryRoleList,
+  roleControllerDeleteRole: deleteRole,
+  roleControllerUpdateRole: modifyRole } =
   services.jiaoseguanli;
 
 const { userControllerGetSelUserList: queryUserList } = services.yonghuguanli;
-const { menuControllerGetSelMenuList: queryMenuList, menuControllerGetSelPermissionList: roleGetMenuAccessByid } = services.caidanguanli;
+const { menuControllerGetSelMenuList: queryMenuList } = services.caidanguanli;
+const {
+  permissionControllerGetRoleUserAccessByid: getMenuView,
+} = services.quanxianguanli;
 /**
  * 添加
  * @param fields
@@ -105,6 +116,7 @@ const TableList: React.FC<unknown> = () => {
     useState<string>('add');
   const [currentRecord, setCurrentRecord] = useState<API.Role>({} as any);
   const [userList, setUserList] = useState<API.User[]>([]);
+  const [allUserList, setAllUserList] = useState<API.User[]>([]);
   const [menuList, setMenuList] = useState<API.Menu[]>([]);
   const [checkUser, setCheckUser] = useState<number[]>([]);
   const [checkMenu, setCheckMenu] = useState<number[]>([]);
@@ -115,19 +127,35 @@ const TableList: React.FC<unknown> = () => {
       if (res.code === 200) {
         const userData = res.data.User;
         const userIds = userData.map((item: API.User) => item.id)
-        setCheckUser(userIds)
+        const roleUserList = allUserList.filter(
+          (item: API.User) => !userIds.includes(item.id) && (item?.role_level as number) > (initialState?.userInfo?.role?.sort as number));
+        // setCheckUser(userIds)
+        console.log(initialState?.userInfo, 'initialState?.userInfo?.role_level');
+
+        setUserList(roleUserList)
       }
     })
   }
 
   const queryRoleMenuAccess = (id: number) => {
-    roleGetMenuAccessByid({ id }).then((res) => {
+    getMenuView({ id }).then((res) => {
       if (res.code === 200) {
         const menuData = res.data;
         const menuIds = menuData.map((item: API.Menu) => item.menu_id)
         setCheckMenu(menuIds)
       }
     })
+  }
+
+  const validateSort = (_, value: any) => {
+    console.log(initialState?.userInfo?.role?.sort, '==');
+    if (!isNaN(Number(value)) && Number(value) < 2) {
+      return Promise.reject(new Error('等级不能小于2'));
+    }
+    if (!isNaN(Number(value)) && Number(value) < (initialState?.userInfo?.role?.sort as number)) {
+      return Promise.reject(new Error('等级不能高于自己的角色等级'));
+    }
+    return Promise.resolve();
   }
 
   const columns: ProColumns<API.Role>[] = [
@@ -152,6 +180,14 @@ const TableList: React.FC<unknown> = () => {
       fieldProps: {
         disabled: !!currentRecord.id,
       },
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: '角色编码名称为必填项',
+          },
+        ],
+      },
       initialValue: currentRecord?.role_code,
     },
     {
@@ -168,6 +204,10 @@ const TableList: React.FC<unknown> = () => {
       hideInSearch: true,
       hideInForm: true,
       initialValue: currentRecord?.founder,
+      render: (_, record) => {
+        const founder = userList.find((item: API.User) => item.id === record.founder)
+        return <Tag color={randomTagColor()}>{founder?.nickName ?? record.founder}</Tag>
+      }
     },
     {
       title: '创建时间',
@@ -177,9 +217,31 @@ const TableList: React.FC<unknown> = () => {
       hideInForm: true
     },
     {
-      title: '排序',
+      title: '人员',
+      dataIndex: 'created_time',
+      valueType: 'text',
+      hideInSearch: true,
+      hideInForm: true,
+      render: (_, record) => record?.User?.map((item: API.User) => <Tag key={item.id} color={randomTagColor()}>{item.nickName}</Tag>)
+    },
+    {
+      title: '等级',
       dataIndex: 'sort',
       valueType: 'text',
+      tip: '等级数字越小，权限越高, 不能操作比自己等级权限更高的用户信息或者角色信息',
+      fieldProps: {
+        type: 'number',
+        min: 3,
+      },
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: '等级为必填项',
+          },
+          { validator: validateSort },
+        ],
+      },
       hideInSearch: true,
       initialValue: currentRecord?.sort,
     },
@@ -204,54 +266,55 @@ const TableList: React.FC<unknown> = () => {
       valueType: 'option',
       render: (_, record) => (
         <>
-          <a
+          <AccessButton
+            hidedivider={true}
+            permission_key='system-role-list-user'
+            type='link'
+            level={record.sort}
             onClick={() => {
               queryRoleUserAccess(record.id)
               setCurrentRecord(record);
               handleUserAceessModalVisible(true)
-            }}
-          >
+            }}>
             分配人员
-          </a>
-          <Divider type="vertical" />
-          <a
+          </AccessButton>
+          <AccessButton
+            permission_key='system-role-list-menu'
+            type='link'
+            level={record.sort}
             onClick={() => {
-              queryRoleMenuAccess(record.id)
-              setCurrentRecord(record);
-              handleMenuAceessModalVisible(true)
-            }}
-          >
+              history.push(`/System/Role/RoleMenu?id=${record.id}`);
+            }}>
             分配菜单
-          </a>
-          <Divider type="vertical" />
-          <a
+          </AccessButton>
+          <AccessButton permission_key='system-role-list-detail' type='link' onClick={() => {
+            queryRoleMenuAccess(record.id)
+            setCurrentRecord(record);
+            handleMenuAceessModalVisible(true)
+          }}>
+            查看菜单
+          </AccessButton>
+          <AccessButton
+            permission_key='system-role-list-edit'
+            type='link'
+            level={record.sort}
             onClick={() => {
               handleModalVisible(true);
               setCurrentRecord(record);
               handleTableAction('edit')
-            }}
-          >
-            分配权限
-          </a>
-          <Divider type="vertical" />
-          <a
-            onClick={() => {
-              handleModalVisible(true);
-              setCurrentRecord(record);
-              handleTableAction('edit')
-            }}
-          >
+            }}>
             编辑
-          </a>
-          <Divider type="vertical" />
-          <a
+          </AccessButton>
+          <AccessButton
+            permission_key='system-role-list-delete'
+            type='link'
+            level={record.sort}
             onClick={async () => {
               await handleDel(record.id)
               actionRef.current?.reloadAndRest?.();
-            }}
-          >
+            }}>
             删除
-          </a>
+          </AccessButton>
         </>
       ),
     },
@@ -262,7 +325,7 @@ const TableList: React.FC<unknown> = () => {
       callApi = handleUpdate
       Object.assign(value, { id: currentRecord.id })
     } else {
-      Object.assign(value, { founder: initialState?.userInfo?.id ? String(initialState?.userInfo?.id) : '' })
+      Object.assign(value, { founder: initialState?.userInfo?.id })
     }
     const success = await callApi(value);
     if (success) {
@@ -282,6 +345,7 @@ const TableList: React.FC<unknown> = () => {
     queryUserList().then((res) => {
       if (res.code === 200) {
         setUserList(res.data)
+        setAllUserList(res.data)
       }
     })
     queryMenuList().then((res) => {
@@ -319,13 +383,13 @@ const TableList: React.FC<unknown> = () => {
           },
         }}
         toolBarRender={() => [
-          <Button
+          <AccessButton
             key="1"
             type="primary"
-            onClick={() => { handleModalVisible(true); handleTableAction('add'); setCurrentRecord({}) }}
-          >
+            permission_key='system-role-list-delete'
+            onClick={() => { handleModalVisible(true); handleTableAction('add'); setCurrentRecord({} as any) }}>
             新增角色
-          </Button>,
+          </AccessButton>,
         ]}
         request={async (params, sorter, filter) => {
           const { data, success } = await queryRoleList({
@@ -354,11 +418,12 @@ const TableList: React.FC<unknown> = () => {
       <StaffAuthorizationModal
         title={<div><span>分配人员</span><span style={{ color: 'red' }}>{currentRecord.role_name}</span><span>角色</span></div>}
         role_id={currentRecord.id}
+        level={currentRecord.sort}
         checkData={checkUser}
         userData={userList}
         modalVisible={userAceessModalVisible}
         onChange={(val: number[]) => { setCheckUser(val) }}
-        onCancel={() => handleUserAceessModalVisible(false)}>
+        onCancel={(reresh?: boolean) => { handleUserAceessModalVisible(false); if (reresh) { setCheckUser([]); actionRef.current?.reloadAndRest?.(); } }}>
       </StaffAuthorizationModal>
       <MenuAuthorizationModal
         title='分配角色菜单'

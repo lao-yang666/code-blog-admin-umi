@@ -2,12 +2,17 @@ import { PageContainer } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
 import { Col, Row, Space, Typography } from 'antd'
 import RenderContent from './components/RenderContent' // 顶部布局
-import StatisticChart from './components/StatisticChart' // 指标卡片
-import Logs from './components/Logs' // 指标卡片
-import styles from './index.less';
-
+import QuickWayCard from './components/QuickWay'
+import GitCommitLog from './components/GitCommitLog'
+import StatisticChart from './components/StatisticChart'
+import HotPost from './components/HotPost'
+import Logs from './components/Logs'
+import CardBoxWrap from '@/components/CardBoxWrap';
 const { Paragraph, Text } = Typography;
 
+const LogsCard = CardBoxWrap(Logs);
+const HotPostCard = CardBoxWrap(HotPost);
+const GitCommitLogCard = CardBoxWrap(GitCommitLog);
 const HomePage: React.FC = () => {
   const { name } = useModel('global');
   const { initialState } = useModel('@@initialState');
@@ -27,27 +32,26 @@ const HomePage: React.FC = () => {
     )
   }
   return (
-    <PageContainer ghost content={<RenderContent />}>
-      <Space direction="vertical" size="middle" style={{ display: 'flex', marginTop: 16 }}>
-        {/* 指标卡片 */}
-        <div style={{ marginTop: '-12px' }} >
-          <StatisticChart />
-        </div>
+    <PageContainer ghost content={<RenderContent />} header={undefined} title={false} className='page-container'>
+      <StatisticChart></StatisticChart>
+      <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
         <Row gutter={16}>
           <Col span={14}>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-              {/* 主要技术栈 */}
-              <div className={styles.notice}></div>
               {/* 博客日志 */}
-              <Logs />
+              <LogsCard title='操作日志' />
+              {/* 博客日志 */}
+              {/* <LogsCard title='操作日志' /> */}
+
             </Space>
           </Col>
           <Col span={10}>
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-              {/* 最新动态 */}
-              <div className={styles.notice}></div>
-              {/* Git 操作日志 */}
-              <div className={styles.notice}></div>
+              {/* 快捷入口 */}
+              <HotPostCard title='最热文章' />
+              {/* 提交日志 */}
+              <GitCommitLogCard title='git提交日志' />
+              {/* <QuickWayCard title='快捷入口' /> */}
             </Space>
           </Col>
         </Row>

@@ -2,6 +2,7 @@ import type { PageResponse, Response } from '@/utils/types'
 import { isSuccess } from '@/utils'
 import { compact, get, join, startsWith } from 'lodash';
 import type { RequestData } from '@ant-design/pro-components';
+import { createFromIconfontCN } from '@ant-design/icons';
 
 /**
  * @description: 将 pathname 转成国际化对应的 key，如：/administrative/jobs-management => administrative.jobs-management
@@ -38,3 +39,8 @@ export const formatPerfix = (route: string, suffix = '', isMenu = false): string
   const field = `${isMenu ? 'menu' : 'pages'}.${formatPathName(route)}${suffix ? '.' + suffix : ''}`
   return startsWith(route, 'global') ? route : field
 }
+
+
+export const IconFont = createFromIconfontCN({
+  scriptUrl: process.env.ICONFONT_URL,
+});

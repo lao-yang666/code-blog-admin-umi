@@ -143,6 +143,8 @@ export const getRoutes = (menus: API.Menu[] | undefined): any => {
       name: item.name,
       icon: item.icon,
       hideInMenu: item.hideInMenu === 0,
+      hideInBreadcrumb: item.hideInBreadcrumb === 0,
+      hideChildrenInMenu: item.hideChildrenInMenu === 0,
       routes: getRoutes(item.children)
     }
     if (item.component) {
@@ -160,19 +162,30 @@ export const getRoutes = (menus: API.Menu[] | undefined): any => {
 }
 
 
-export const formatRoute = (menu: API.Menu): any => {
-  const route = {
+export const formatRoute = (menu: API.Menu, ids: number[] = []): any => {
+  console.log(menu,ids,'xxxxxx');
+  
+  return {
     path: menu.path,
     name: menu.name,
     icon: menu.icon,
+    menu_id: menu.menu_id,
+    hasAccess: ids.includes(menu.menu_id),
+    wrappers: [
+      '@/wrappers/auth',
+    ],
     hideInMenu: menu.hideInMenu === 0,
+    hideInBreadcrumb: menu.hideInBreadcrumb === 0,
+    hideChildrenInMenu: menu.hideChildrenInMenu === 0,
   }
-  // if (menu.children) {
-  //   Object.assign(route, {
-  //     routes: menu.children.map((item: API.Menu) => {
-  //       return formatRoute(item)
-  //     })
-  //   })
-  // }
-  return route
+}
+
+
+export const getMenuListByRoutes = (routes: API.Menu[], ids: number[] = []): any[] => {
+  return routes.map(({ children, ...item }) => {
+    return {
+      ...formatRoute(item, ids),
+      routes: children ? getMenuListByRoutes(children, ids) : [],
+    }
+  })
 }

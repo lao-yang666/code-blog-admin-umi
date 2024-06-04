@@ -26,6 +26,17 @@ declare namespace DynamicRoutes {
     children?: Route[];
   }
 
+  interface RouteItem {
+    path?: string;
+    name?: string;
+    icon?: string;
+    id?: number | string;
+    parentId?: number | string;
+    element?: JSX.Element;
+    children?: RouteItem[];
+    routes: RouteItem[];
+  }
+
   // 前端根据后端返回数据生成的React.lazy懒加载组件或Outlet（一级路由）
   type RouteComponent = LazyExoticComponent<ComponentType<any>> | typeof Outlet;
 

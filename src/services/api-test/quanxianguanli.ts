@@ -100,7 +100,7 @@ export async function permissionsControllerGetSelUserList(options?: { [key: stri
 /** 修改权限信息 PUT /permissions/update/${param0} */
 export async function permissionsControllerUpdatePermissions(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.PermissionsControllerUpdatePermissionsParams,
+  params: { id: number },
   body: API.Permissions,
   options?: { [key: string]: any },
 ) {
@@ -119,7 +119,7 @@ export async function permissionsControllerUpdatePermissions(
 /** 权限启用/停用 PUT /permissions/updateStatus/${param0} */
 export async function permissionsControllerUpdatePermissionsStatus(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.PermissionsControllerUpdatePermissionsStatusParams,
+  params: { id: number },
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;

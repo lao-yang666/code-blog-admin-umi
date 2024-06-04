@@ -33,6 +33,39 @@ export const getToken = () => {
 }
 
 /**
+ * @description: 获取 localstorage 的值
+ * @author: 白雾茫茫丶
+ */
+export const getLocalStorageItem = <T>(key: string): T | null => {
+  // 获取 值
+  const item = localStorage.getItem(key);
+  // 判断是否为空 
+  if (item === null) {
+    return null;
+  }
+  // 不为空返回解析后的值
+  const result: T = JSON.parse(item);
+  return result
+}
+
+/**
+ * @description: 存储 localstorage 的值
+ * @author: 白雾茫茫丶
+ */
+export const setLocalStorageItem = <T>(key: string, value: T) => {
+  const result = JSON.stringify(value);
+  localStorage.setItem(key, result);
+}
+
+/**
+ * @description: 移除 localstorage 的值
+ * @author: 白雾茫茫丶
+ */
+export const removeLocalStorageItem = (key: string) => {
+  localStorage.removeItem(key);
+}
+
+/**
  * @description: 获取 sessionStorage 的值
  * @author: laoyang
  */
@@ -150,3 +183,12 @@ export const randomTagColor = () => {
   const colors = ['magenta', 'red', 'volcano', 'orange', 'gold', 'lime', 'green', 'cyan', 'blue', 'geekblue', 'purple']
   return sample(colors)
 }
+
+// export const encryptionAesPsd = (password: string): string => {
+//   const encrypted = CryptoJS.AES.encrypt(password, CRYPTO_KEY, {
+//     iv: CRYPTO_IV,
+//     mode: CryptoJS.mode.CBC,
+//     padding: CryptoJS.pad.Pkcs7,
+//   });
+//   return encrypted.toString(); // 返回的是base64格式的密文
+// };

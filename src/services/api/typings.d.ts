@@ -1,40 +1,5 @@
 declare namespace API {
 
-  type gameShanhaiMonster = {
-    id: number;
-    name?: string;
-    age?: string;
-    location?: string;
-    element?: string;
-    needSeals?: string;
-    parts: gameShanhaiMonsterParts[];
-  };
-
-  type gameShanhaiMonsterParts = {
-    id: number;
-    name: string;
-    attack: number;
-    monsterId?: number;
-    monster?: gameShanhaiMonster;
-  };
-
-  type MonsterControllerDeleteMonsterParams = {
-    id: string;
-  };
-
-  type MonsterControllerGetMonsterByIdParams = {
-    id: string;
-  };
-
-  type MonsterControllerGetMonstersParams = {
-    current: string;
-    pageSize: string;
-  };
-
-  type MonsterControllerPublishMonsterParams = {
-    id: string;
-  };
-
   type Post = {
     id: number;
     draftId?: number;
@@ -43,7 +8,7 @@ declare namespace API {
     content: string;
     published?: boolean;
     authorId?: number;
-    authorName?: string;
+    author?:User;
     category?: string;
     viewNum?: number;
     ikeNum?: number;
@@ -57,10 +22,10 @@ declare namespace API {
     draftId?: number;
     postId?: number;
     title: string;
+    author?:User;
     content: string;
     published?: boolean;
     authorId: number;
-    authorName: string;
     category?: string;
     viewNum?: number;
     ikeNum?: number;
@@ -100,13 +65,13 @@ declare namespace API {
     role_name: string;
     role_code: string;
     describe: string;
-    founder: string;
+    founder: number;
     sort: number;
     status: number;
     created_time: string;
     updated_time: string;
     Permission?: Permission[];
-    user?: User[];
+    User?: User[];
   };
 
   type RoleControllerDeleteRoleParams = {
@@ -126,7 +91,7 @@ declare namespace API {
     role_name: string;
     role_code: string;
     describe: string;
-    founder: string;
+    founder: number;
     sort: number;
     status: number;
     created_time: string;
@@ -151,38 +116,12 @@ declare namespace API {
     menu_id: string[];
   };
 
-  type Permissions = {
-    id: number;
-    name: string;
-    permission_key: string;
-    role_id?: number;
-    menu_id?: number;
-    button_id?: number;
-    scope: permissionScope;
-    describe?: string;
-    created_time: string;
-    updated_time: string;
-  };
-
-  type PermissionsControllerDeletePermissionsParams = {
-    id: number;
-  };
-
-  type PermissionsControllerGetPermissionsByidParams = {
-    id: string;
-  };
-
-  type PermissionsControllerGetPermissionssParams = {
-    current: string;
-    pageSize: string;
-    name: string;
-    permissions_name?: any;
-  };
 
   type permissionScope = 'role' | 'menu' | 'button';
 
   type PermissionsNew = {
     name: string;
+    founder: number;
     permission_key: string;
     role_id?: number;
     menu_id?: number;
@@ -198,8 +137,11 @@ declare namespace API {
     email: string;
     phone: string;
     password: string;
-    role_id: string;
+    role_id: number;
     role_name?: string;
+    role_level?: number;
+    role_code?: string;
+    role?: Role;
     name?: string;
     gender: userSex;
     nickName?: string;
@@ -225,8 +167,10 @@ declare namespace API {
     email: string;
     phone: string;
     password: string;
-    role_id: string;
+    role_id: number;
     role_name?: string;
+    role_level?: string;
+    role_code?: number;
     name?: string;
     gender: userSex;
     nickName?: string;
@@ -279,7 +223,7 @@ declare namespace API {
     component?: string;
     redirect?: string;
     parent_id?: number;
-    permission?: string;
+    permissionList?: string | string[];
     meta?: string;
     extraProperties?: string;
     wrappers?: number;
@@ -287,6 +231,7 @@ declare namespace API {
     hideInMenu?: number;
     hideInBreadcrumb?: number;
     founder: number;
+    isOnlyRead?: number;
     sort: number;
     status: number;
     created_time: string;
@@ -301,13 +246,14 @@ declare namespace API {
     component?: string;
     redirect?: string;
     parent_id?: number;
-    permission?: string;
+    permissionList?: string | string[];
     meta?: string;
     extraProperties?: string;
     wrappers?: number;
     hideChildrenInMenu?: number;
     hideInMenu?: number;
     hideInBreadcrumb?: number;
+    isOnlyRead?: number;
     founder: number;
     sort: number;
     status: number;
@@ -318,9 +264,11 @@ declare namespace API {
   type buttonPermission = {
     id: number;
     name: string;
+    founder: number;
     permission_key: string;
     menu_id: number;
-    effect_form?: string;
+    status?: number;
+    effect_form: string;
     describe?: string;
     created_time: string;
     updated_time: string;
@@ -350,9 +298,21 @@ declare namespace API {
     name: string;
     permission_key: string;
     menu_id: number;
+    founder: number;
+    status?: number;
     effect_form?: string;
     describe?: string;
     created_time: string;
     updated_time: string;
   };
+
+  type RoleMenuPermission = {
+    roleId: number;
+    menuId: number;
+    permissionId: number;
+    menu: Menu,
+    role: Role,
+    button_permission: buttonPermission,
+  }
+
 }

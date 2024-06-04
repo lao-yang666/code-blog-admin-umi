@@ -1,3 +1,3 @@
-module.exports = {
+  module.exports = {
   extends: require.resolve('@umijs/max/stylelint'),
 };

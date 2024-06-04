@@ -89,14 +89,31 @@ export async function buttonPermissionControllerUpdatebuttonPermission(
 
 /** 按钮权限启用/停用 PUT /button_permission/updateStatus/${param0} */
 export async function buttonPermissionControllerUpdatebuttonPermissionStatus(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.ButtonPermissionControllerUpdatebuttonPermissionStatusParams,
+  id: number,
+  status: number,
   options?: { [key: string]: any },
 ) {
-  const { id: param0, ...queryParams } = params;
-  return request<any>(`/button_permission/updateStatus/${param0}`, {
+  return request<any>(`/button_permission/updateStatus/${id}`, {
     method: 'PUT',
-    params: { ...queryParams },
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: { id, status },
+    ...(options || {}),
+  });
+}
+
+export async function buttonPermissionControllerUpdateBatchbuttonPermissionStatus(
+  ids: number[],
+  status: number,
+  options?: { [key: string]: any },
+) {
+  return request<any>(`/button_permission/updateBatchStatus`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: { ids, status },
     ...(options || {}),
   });
 }
